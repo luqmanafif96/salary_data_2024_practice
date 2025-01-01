@@ -7,18 +7,9 @@ import plotly.express as px
 # Load Data
 def load_data():
     file_path = "Salary Compare 2024 - QA_Test Engineer Dataset (1).csv"
-    # try the data 
-    try :
-        data = pd.read_csv(file_path, encoding="utf-8")
-        st.success("File loaded successfully!")
-    except FileNotFoundError:
-        st.error(f"File not found. Make sure it is in the correct location: {file_path}")
-    except Exception as e:
-        st.error(f"An error occurred while loading the file: {e}")
-
-    # data = pd.read_csv(file_path, skiprows=2)
-
+    data = pd.read_csv(file_path, skiprows=2)
     data.columns = [ "Recruiter", "Role", "Seniority", "Salary Range", "Min Salary", "Max Salary"]
+    # data = data.drop(columns=["Index"], errors="ignore")
     data["Min Salary"] = data["Min Salary"].str.replace(",", "").astype(int)
     data["Max Salary"] = data["Max Salary"].str.replace(",", "").astype(int)
     return data
@@ -28,37 +19,35 @@ data = load_data()
 # Streamlit App Layout
 st.title("QA Salary Analysis Dashboard")
 st.sidebar.title("Navigation")
-choice = st.sidebar.radio("Choose Visualization", ["Heatmap", "Bubble Chart", "Box Plot"])
+choice = st.sidebar.radio("Choose Visualization", [
+    "Bar Chart - Median Salary by Seniority",  
+    "Bubble Chart", 
+    "Box Plot", 
+    "Grouped Bar Chart - Role and Recruiter"
+])
 
-# if choice == "Bar Chart":
-#     st.subheader("Salary Range by Role")
-#     fig, ax = plt.subplots(figsize=(10, 6))
-#     x = range(len(data["Role"]))
-#     ax.bar(x, data["Min Salary"], width=0.4, label="Min Salary")
-#     ax.bar(x, data["Max Salary"], width=0.4, label="Max Salary", bottom=data["Min Salary"])
-#     ax.set_xticks(x)
-#     ax.set_xticklabels(data["Role"], rotation=45, ha="right")
-#     ax.set_title("Salary Range by Role")
-#     ax.set_ylabel("Salary (MYR)")
-#     ax.legend()
-#     st.pyplot(fig)
+if choice == "Bar Chart - Median Salary by Seniority":
+    st.subheader("Median Salary by Seniority")
 
-# elif choice == "Heatmap":
-if choice == "Heatmap":
-    st.subheader("Heatmap of Average Salary by Recruiter and Role")
-    data["Avg Salary"] = (data["Min Salary"] + data["Max Salary"]) / 2
+    grouped_data = data.groupby("Seniority")["Min Salary", "Max Salary"].median()
+    grouped_data["Median Salary"] = grouped_data.mean(axis=1)
+    grouped_data = grouped_data.reset_index()
 
-    # Handle duplicates by aggregating (e.g., averaging) the duplicate combinations
-    heatmap_data = (
-        data.groupby(["Role", "Recruiter"])["Avg Salary"]
-        .mean()
-        .unstack(fill_value=0)  # Converts to pivot table with no missing values
-    )
-    
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(heatmap_data, annot=True, fmt=".0f", cmap="coolwarm", ax=ax)
-    ax.set_title("Average Salary by Recruiter and Role")
+    sns.barplot(
+        data=grouped_data, 
+        x="Seniority", 
+        y="Median Salary", 
+        palette="Set2", 
+        ax=ax
+    )
+
+    ax.set_title("Median Salary by Seniority")
+    ax.set_ylabel("Median Salary (MYR)")
+    ax.set_xlabel("Seniority")
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
     st.pyplot(fig)
+
 
 elif choice == "Bubble Chart":
     st.subheader("Bubble Chart of Roles, Recruiters, and Salaries")
@@ -88,4 +77,32 @@ elif choice == "Box Plot":
     ax.set_title("Salary Distribution by Seniority Level")
     ax.set_ylabel("Salary (MYR)")
     ax.set_xlabel("Seniority Level")
+    st.pyplot(fig)
+
+elif choice == "Grouped Bar Chart - Role and Recruiter":
+    st.subheader("Median Salary by Role and Recruiter")
+
+    grouped_data = (
+        data.groupby(["Role", "Recruiter"])[["Min Salary", "Max Salary"]]
+        .median()
+        .mean(axis=1)  # Calculate the median salary and combine Min/Max
+        .reset_index(name="Median Salary")
+    )
+
+    fig, ax = plt.subplots(figsize=(14, 8))
+    sns.barplot(
+        data=grouped_data,
+        x="Role",
+        y="Median Salary",
+        hue="Recruiter",
+        palette="viridis",
+        ax=ax,
+    )
+
+    ax.set_title("Median Salary by Role and Recruiter")
+    ax.set_ylabel("Median Salary (MYR)")
+    ax.set_xlabel("Role")
+    plt.xticks(rotation=45, ha="right")
+    ax.legend(title="Recruiter", loc="upper right")
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
     st.pyplot(fig)

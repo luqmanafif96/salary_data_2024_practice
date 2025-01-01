@@ -98,6 +98,12 @@ Example Dataset Structure:
 4. Push to the branch.
 5. Create a pull request.
 
+## Screenshot 
+
+
+https://github.com/user-attachments/assets/d451cca7-ca40-43e6-9565-2d9dec51d757
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

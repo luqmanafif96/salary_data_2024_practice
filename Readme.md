@@ -44,8 +44,8 @@ This project is a Streamlit-based interactive dashboard designed for analyzing Q
 
 1. Clone this repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/luqmanafif96/salary_data_2024_practice.git
+   cd salary_data_2024_practice
    ```
 
 2. Install the required packages:

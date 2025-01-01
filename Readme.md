@@ -50,7 +50,7 @@ This project is a Streamlit-based interactive dashboard designed for analyzing Q
 
 2. Install the required packages:
    ```bash
-   pip install -r requirements.txt
+   pip install streamlit pandas matplotlib seaborn plotly
    ```
 
 3. Place the salary data CSV file (e.g., `Salary Compare 2024 - QA_Test Engineer Dataset (1).csv`) in the project directory.
